@@ -1,6 +1,12 @@
 import React from 'react'
 import {Container, FloatingLabel, Dropdown, Table, Form, Row, Col, InputGroup, FormControl, Button} from 'react-bootstrap'
-
+const { app, BrowserWindow, ipcMain } = require("electron")
+var knex = require("knex")({
+	client: "sqlite3",
+	connection: {
+		filename: path.join(__dirname, 'database.sqlite')
+	}
+});
 function Dashboard() {
     return (
 <Container className="justify-content-md-center">
