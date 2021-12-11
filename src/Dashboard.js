@@ -1,7 +1,13 @@
-import React from 'react'
-import {Container, FloatingLabel, Dropdown, Table, Form, Row, Col, InputGroup, FormControl, Button} from 'react-bootstrap'
+import React, { useEffect } from 'react'
+import {Container, Table, Form, Row, Col, InputGroup, FormControl, Button} from 'react-bootstrap'
 
 function Dashboard() {
+    useEffect(() => {
+      window.api.receive("response", (data) => {
+        console.log(`Received ${data.success} from main process`);
+      });
+      window.api.send('getBillByName', {'seller_name': '1'});
+    }, [])
     return (
 <Container className="justify-content-md-center">
       <Row className="align-items-center m-5">
