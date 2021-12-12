@@ -1,24 +1,52 @@
-import React, { useEffect } from 'react'
+import React, { useEffect , useState} from 'react'
 import {Container, Table, Form, Row, Col, InputGroup, FormControl, Button} from 'react-bootstrap'
+import MoreInfo from './MoreInfo';
 
-function Dashboard() {
-    useEffect(() => {
-      window.api.receive("response", (data) => {
-        console.log(`Received ${data.success} from main process`);
-      });
-      window.api.send('getBillByName', {'seller_name': '1'});
-    }, [])
+function Dashboard({setShow, setModalContent}) {
+  const [result, setResult] = useState([]);
+  const getDateAfterSubtraction = (num) => {
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate()-parseInt(num));
+    return tomorrow.toLocaleString()
+  }
+  const [query, setQuery] = useState({ 'past': getDateAfterSubtraction(1), 'q': ''})
+  useEffect(() => {
+    window.api.receive("response", (data) => {
+      console.log(data)
+      setResult(data.data.sort((a, b) => b.invoice_id-a.invoice_id));
+    });
+    window.api.send('getBillByName', query);
+  }, []);
+  
+  const setDateForSearch = (e) => {
+    setQuery({...query, past: getDateAfterSubtraction(e.target.value)})
+  }
+
+    const searchHandler = (e) => {
+      e.preventDefault();
+      window.api.send('getBillByName', query);
+    } 
+
+    const getTotal = () => {
+      let amount = 0;
+      result.forEach((res) => amount+=res.total);
+      return amount
+    }
+    const moreInfoHandler = (data) =>{
+      setModalContent(<MoreInfo data={data}/>)
+      setShow(true)
+    }
     return (
-<Container className="justify-content-md-center">
+    <Container className="justify-content-md-center">
       <Row className="align-items-center m-5">
         <Col sm={4} className="my-1">
         <InputGroup>
             <InputGroup.Text>Past</InputGroup.Text>
-          <Form.Select aria-label="Floating label select example">
-            <option>1 day</option>
-            <option value="1">7 days</option>
-            <option value="2">30 days</option>
-            <option value="3">1 year</option>
+          <Form.Select aria-label="Floating label select example" onChange={setDateForSearch}>
+            <option value="1">1 day</option>
+            <option value="7">7 days</option>
+            <option value="30">30 days</option>
+            <option value="365">1 year</option>
           </Form.Select>
           </InputGroup>
         </Col>
@@ -28,11 +56,11 @@ function Dashboard() {
           </Form.Label>
           <InputGroup>
             <InputGroup.Text>Query</InputGroup.Text>
-            <FormControl id="inlineFormInputGroupUsername" placeholder="Seller Name" />
+            <FormControl value={query.q} onChange={(e) => setQuery({...query, q: e.target.value})} id="inlineFormInputGroupUsername" placeholder="Seller Name" />
           </InputGroup>
         </Col>
         <Col xs="auto" className="my-1">
-          <Button type="submit">Search</Button>
+          <Button type="submit" onClick={searchHandler} >Search</Button>
         </Col>
       </Row>
       <Row className="justify-content-md-center m-5">
@@ -40,7 +68,7 @@ function Dashboard() {
           <InputGroup>
             <InputGroup.Text id="basic-addon1">Total</InputGroup.Text>
             <FormControl
-              value="100000"
+              value={getTotal()}
               aria-label="Username"
               aria-describedby="basic-addon1"
               readonly
@@ -55,28 +83,24 @@ function Dashboard() {
             <th>#</th>
             <th>Date</th>
             <th>Buyer Name</th>
+            <th>Net Weight</th>
+            <th>Rate</th>
             <th>Amount</th>
+            <th>More Info</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>12-04-2021</td>
-            <td>Raj Mill</td>
-            <td>30000</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>12-04-2021</td>
-            <td>Indian Nill</td>
-            <td>30000</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>12-04-2021</td>
-            <td>Famous Mill</td>
-            <td>40000</td>
-          </tr>
+          {result.map( (data) => {
+            return  (<tr>
+            <td>{data.invoice_id}</td>
+            <td>{data.date}</td>
+            <td>{data.buyer_name}</td>
+            <td>{data.NetWeight}</td>
+            <td>{data.rate}</td>
+            <td>{data.total}</td>
+            <td><Button onClick={() => moreInfoHandler(data)}>More</Button></td>
+          </tr>);
+          })}
         </tbody>
       </Table>
     </Container>

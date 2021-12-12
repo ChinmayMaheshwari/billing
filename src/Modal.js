@@ -1,14 +1,14 @@
 import {React} from 'react';
-import { Modal, Spinner} from 'react-bootstrap';
+import { Modal} from 'react-bootstrap';
 
-function WaitModal({show}) {
+function WaitModal({show, setShow, prop}) {
     return (
       <>
-        <Modal show={show}>
-          <Modal.Header>
-            <Modal.Title>Saving Data Please Wait ...</Modal.Title>
+        <Modal fullscreen={true} show={show} onHide={() => setShow(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title></Modal.Title>
           </Modal.Header>
-          <Modal.Body className='text-center'><Spinner animation="grow" /></Modal.Body>
+          <Modal.Body className='text-center'>{prop}</Modal.Body>
         </Modal>
       </>
     );

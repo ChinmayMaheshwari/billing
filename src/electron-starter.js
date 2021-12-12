@@ -43,24 +43,25 @@ app.on('ready',() =>{
     createWindow();
     db.serialize(function() {
         db.run("CREATE TABLE if not exists records (\
-                invoice_id interger PRIMARY KEY, \
+                invoice_id integer PRIMARY KEY, \
                 vehicle_number TEXT, \
-                date TEXT, \
+                date DATETIME, \
                 seller_name TEXT, \
                 buyer_name TEXT, \
                 category TEXT, \
-                rate interger, \
-                GroosWeight FLOAT, \
+                rate integer, \
+                bags integer, \
+                GrossWeight FLOAT, \
                 DeductionWeight FLOAT, \
                 NetWeight FLOAT, \
-                hamali interger, \
-                majdoori interger, \
-                bhada interger, \
-                digar interger, \
-                cash interger, \
-                kata interger, \
-                advance interger, \
-                total interger, \
+                hamali integer, \
+                majdoori integer, \
+                bhada integer, \
+                digar integer, \
+                cash integer, \
+                kata integer, \
+                advance integer, \
+                total integer, \
                 notes TEXT \
               )");
 
@@ -98,23 +99,39 @@ app.on('activate', function () {
 });
 
 ipcMain.on("getBillByName", (event, data) => {
-    console.log("SELECT invoice_id AS id, seller_name, buyer_name FROM records where seller_name="+ data.seller_name)
-    db.each("SELECT invoice_id AS id, seller_name,total,NetWeight,category buyer_name FROM records where seller_name='"+ data.seller_name+"'", function(err, row) {
-        console.log(row.id + ": " + row.seller_name);
-        mainWindow.webContents.send("response", {'success':`${row.total} - ${row.NetWeight} - ${row.category}`});
-    });
-})
+    var results = []
+    if (data.q){
+            db.each(`SELECT * FROM records where buyer_name LIKE '%${data.q}%'`, function(err, row) {
+            results.push(row);
+             }, () => event.sender.send("response", {'success':'true', "data": results}))
+    }
+    else{
+        db.each(`SELECT * FROM records`, function(err, row) {
+            results.push(row);
+             }, () => {
+                 let result = []
+                 results.forEach( (res) => {
+                     if (res.date> data.past){
+                        result.push(res);
+                     }
+                    });
+                 event.sender.send("response", {'success':'true', "data": result})
+                })
+        
+    }
+    })
 
 ipcMain.on("createBill", (event, data) => {
-    let GroosWeight = parseFloat(parseInt(data.GroosWeightInKwintal) + parseInt(data.GroosWeightInKilo)/1000)
+    let GrossWeight = parseFloat(parseInt(data.GrossWeightInKwintal) + parseInt(data.GrossWeightInKilo)/1000)
     let DeductionWeight = parseFloat(parseInt(data.DeductionWeightInKwintal) + parseInt(data.DeductionWeightInKilo)/1000)
     let NetWeight = parseFloat(parseInt(data.NetWeightInKwintal) + parseInt(data.NetWeightInKilo)/1000)
     db.serialize(function() {
-        var stmt = db.prepare("INSERT INTO records VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        var stmt = db.prepare("INSERT INTO records VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         stmt.run(data.invoice_id, data.vehicle_number, data.date, data.seller_name, data.buyer_name, 
                 data.category, 
                 data.rate,
-                GroosWeight,
+                data.bags,
+                GrossWeight,
                 DeductionWeight,
                 NetWeight,
                 data.hamali,
@@ -125,12 +142,13 @@ ipcMain.on("createBill", (event, data) => {
                 data.kata ,
                 data.advance ,
                 data.total ,
-                data.notes );
+                data.notes
+                 );
         stmt.finalize();
-        db.each("SELECT invoice_id AS id, seller_name, buyer_name FROM records", function(err, row) {
-            console.log(row.id + ": " + row.seller_name);
-            mainWindow.webContents.send("response", {'success':`${row.id} - ${row.seller_name} - ${row.buyer_name}`});
-        });
+        // db.each("SELECT invoice_id AS id, seller_name, buyer_name FROM records", function(err, row) {
+        //     console.log(row.id + ": " + row.seller_name);
+        mainWindow.webContents.send("response", {'success': 'true'});
+        // });
     })
 
   });

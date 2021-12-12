@@ -8,7 +8,7 @@ function Billing({setShow}) {
     const onChangeHandler = (e) => {
       const element = e.target;
       let updatedData = {...data, [element.name]: element.value}
-      let netWeightInKwintal = getInteger(updatedData.GroosWeightInKwintal) - getInteger(updatedData.DeductionWeightInKwintal)
+      let netWeightInKwintal = getInteger(updatedData.GrossWeightInKwintal) - getInteger(updatedData.DeductionWeightInKwintal)
       let netWeightInKilo = getInteger(updatedData.GrossWeightInKilo) - getInteger(updatedData.DeductionWeightInKilo)
       updatedData = {...updatedData, NetWeightInKwintal: netWeightInKwintal, NetWeightInKilo: netWeightInKilo }
       if (getInteger(updatedData.GrossWeightInKilo) < getInteger(updatedData.DeductionWeightInKilo)){
@@ -118,7 +118,6 @@ function Billing({setShow}) {
             <FloatingLabel controlId="floatingSelect" label="Category" className='mb-3'>
               <Form.Select aria-label="Floating label select example" name="category" 
                 onChange={onChangeHandler}>
-                <option>Cotton</option>
                 <option value="Cotton">Cotton</option>
                 <option value="Soyabean">Soyabean</option>
                 <option value="Chana">Chana</option>
@@ -252,9 +251,9 @@ function Billing({setShow}) {
                   <th>Gross</th>
                   <td colSpan="2">
                     <FormControl
-                      value={data.GroosWeightInKwintal}
+                      value={data.GrossWeightInKwintal}
                       onChange={onChangeHandler}
-                      name="GroosWeightInKwintal"
+                      name="GrossWeightInKwintal"
                       type="number"
                       step="0.01"
                       min="0"

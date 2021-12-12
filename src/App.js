@@ -3,16 +3,17 @@ import Navbar from './Navbar';
 import Dashboard from './Dashboard';
 import { useState } from 'react';
 import WaitModal from './Modal'
+import { Spinner } from 'react-bootstrap';
 
 function App() {
   const [flag, setflag] = useState(false);
   const [show, setShow] = useState(false);
-
+  const [modalContent, setModalContent] = useState(<Spinner animation="grow" />)
   return (
     <>
       <Navbar setflag={setflag}/>
-      {flag?<Dashboard/>:<Billing setShow={setShow} />}
-      <WaitModal show={show}/>
+      {flag?<Dashboard setShow={setShow} setModalContent={setModalContent} />:<Billing setShow={setShow} />}
+      <WaitModal show={show} setShow={setShow} prop={modalContent}/>
     </>
   );
 }
