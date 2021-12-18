@@ -1,8 +1,9 @@
 import { InputGroup, FormControl, Form, Row, Container, Col, FloatingLabel, Stack, Table, Button } from 'react-bootstrap';
 import {React, useEffect, useState} from 'react'
 import {inWords, getInvoiceNumber, intialStateData, getInteger} from './Utility';
+import MoreInfo from './MoreInfo';
 
-function Billing({setShow}) {
+function Billing({setShow, setModalContent}) {
     const [data, setData] = useState(intialStateData);
     
     const onChangeHandler = (e) => {
@@ -13,9 +14,9 @@ function Billing({setShow}) {
       updatedData = {...updatedData, NetWeightInKwintal: netWeightInKwintal, NetWeightInKilo: netWeightInKilo }
       if (getInteger(updatedData.GrossWeightInKilo) < getInteger(updatedData.DeductionWeightInKilo)){
         updatedData.NetWeightInKwintal = getInteger(updatedData.NetWeightInKwintal) - 1
-        updatedData.NetWeightInKilo = 1000 - getInteger(updatedData.DeductionWeightInKilo) + getInteger(updatedData.GrossWeightInKilo)
+        updatedData.NetWeightInKilo = 100 - getInteger(updatedData.DeductionWeightInKilo) + getInteger(updatedData.GrossWeightInKilo)
       }
-      let netWeight = netWeightInKwintal + netWeightInKilo/1000
+      let netWeight = netWeightInKwintal + netWeightInKilo/100
       let total = netWeight * getInteger(updatedData.rate)
       total = total - getInteger(updatedData.kata) - getInteger(updatedData.hamali) - getInteger(updatedData.cash) - getInteger(updatedData.advance) - getInteger(updatedData.digar) - getInteger(updatedData.majdoori) - getInteger(updatedData.bhada)
       total = Math.round(total)
@@ -27,8 +28,10 @@ function Billing({setShow}) {
       e.preventDefault();
       setShow(true);
       window.api.receive("response", (data) => {
-        console.log(`Received ${data.success} from main process`);
-        setShow(false)
+        if(data.source=='Created'){
+          setModalContent(<MoreInfo data={data.data}/>)
+          setData(intialStateData);
+        }
       });
       window.api.send('createBill', data);
       
@@ -74,7 +77,7 @@ function Billing({setShow}) {
           <InputGroup className="mb-3">
               <InputGroup.Text id="date">Date</InputGroup.Text>
               <FormControl
-                value={data.date}
+                value={data.date.toLocaleString()}
                 aria-label="Date"
                 aria-describedby="date"
                 name="date"
@@ -166,6 +169,7 @@ function Billing({setShow}) {
                     aria-label="Majdoori"
                     aria-describedby="Majdoori"
                     type="number"
+                    min="0"
                     required
                     />
                   <InputGroup.Text>₹</InputGroup.Text>
@@ -179,6 +183,7 @@ function Billing({setShow}) {
                     aria-label="Bhada"
                     aria-describedby="Bhada"
                     type="number"
+                    min="0"
                     required
                     />
                   <InputGroup.Text>₹</InputGroup.Text>
@@ -192,6 +197,7 @@ function Billing({setShow}) {
                     aria-label="Digar"
                     aria-describedby="Digar"
                     type="number"
+                    min="0"
                     required
                     />
                   <InputGroup.Text>₹</InputGroup.Text>
@@ -205,6 +211,7 @@ function Billing({setShow}) {
                     aria-label="Cash"
                     aria-describedby="Cash"
                     type="number"
+                    min="0"
                     required
                     />
                   <InputGroup.Text>₹</InputGroup.Text>
@@ -218,6 +225,7 @@ function Billing({setShow}) {
                     aria-label="Kata"
                     aria-describedby="Kata"
                     type="number"
+                    min="0"
                     required
                     />
                   <InputGroup.Text>₹</InputGroup.Text>
@@ -231,6 +239,7 @@ function Billing({setShow}) {
                     aria-label="Advance"
                     aria-describedby="Advance"
                     type="number"
+                    min="0"
                     required
                     />
                   <InputGroup.Text>₹</InputGroup.Text>
@@ -268,7 +277,7 @@ function Billing({setShow}) {
                     type="number"
                     step="0.01"
                     min="0"
-                    max="999"
+                    max="99"
                     required
                     />
                   </td>
@@ -293,7 +302,7 @@ function Billing({setShow}) {
                       name="DeductionWeightInKilo"
                       type="number"
                       step="0.01"
-                      max="999"
+                      max="99"
                       min="0"
                       required
                       />

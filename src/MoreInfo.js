@@ -3,7 +3,6 @@ import { InputGroup, FormControl, Form, Row, Container, Col, FloatingLabel, Stac
 import { inWords } from './Utility';
 
 function MoreInfo({ data }) {
-    console.log(data);
     return (
             <Container className='my-3 p-5' style={{border: 'solid', boxShadow:'3px 10px #888888'}}>
             <h1 className='mb-3 text-center'>Invoice</h1>
@@ -40,7 +39,7 @@ function MoreInfo({ data }) {
                 <InputGroup className="mb-3">
                     <InputGroup.Text id="date">Date</InputGroup.Text>
                     <FormControl
-                      value={data.date}
+                      value={new Date(data.date).toLocaleString()}
                       aria-label="Date"
                       aria-describedby="date"
                       name="date"
@@ -228,7 +227,7 @@ function MoreInfo({ data }) {
                         </td>
                         <td>            
                           <FormControl
-                            value={parseFloat(data.GrossWeight % 1).toFixed(3)*1000}
+                            value={parseFloat(data.GrossWeight % 1).toFixed(2)*100}
                             name="GrossWeightInKilo"
                             readOnly
                             type="number"
@@ -254,7 +253,7 @@ function MoreInfo({ data }) {
                         </td>
                         <td>            
                           <FormControl
-                            value={parseFloat(data.DeductionWeight%1).toFixed(3)*1000}
+                            value={parseFloat(data.DeductionWeight%1).toFixed(2)*100}
                             readOnly
                             name="DeductionWeightInKilo"
                             type="number"
@@ -280,10 +279,9 @@ function MoreInfo({ data }) {
                         <td>
                           <InputGroup>
                             <FormControl
-                              value={parseFloat(data.NetWeight%1).toFixed(3)*1000}
+                              value={parseFloat(data.NetWeight%1).toFixed(2)*100}
                               readOnly
                               name="NetWeightInKilo"
-                              readOnly
                               />
                           </InputGroup>
                         </td>
@@ -328,7 +326,7 @@ function MoreInfo({ data }) {
               </Row>
               <Row>
                 <Col className='text-center mt-3'>
-                    <Button id='submit-btn'>Print</Button>
+                    <Button id='print-btn' onClick={() => {document.getElementById('print-btn').style.display = 'none';window.print();document.getElementById('print-btn').style.display = 'inline-block';}}>Print</Button>
                 </Col>
               </Row>
             </Form>

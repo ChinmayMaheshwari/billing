@@ -98,33 +98,35 @@ app.on('activate', function () {
     }
 });
 
+function getLastNDaysRecord(results, past){
+    let result = []
+    results.forEach( (res) => {
+        if (new Date(res.date)> new Date(past)){
+            result.push(res);
+        }
+    });
+    return result;
+}
 ipcMain.on("getBillByName", (event, data) => {
     var results = []
     if (data.q){
             db.each(`SELECT * FROM records where buyer_name LIKE '%${data.q}%'`, function(err, row) {
             results.push(row);
-             }, () => event.sender.send("response", {'success':'true', "data": results}))
+             }, () => event.sender.send("response", {'success':'true', 'source': 'Result', "data": getLastNDaysRecord(results, data.past)}))
     }
     else{
-        db.each(`SELECT * FROM records`, function(err, row) {
+        db.each(`SELECT * FROM records where date>= ${data.past}`, function(err, row) {
             results.push(row);
-             }, () => {
-                 let result = []
-                 results.forEach( (res) => {
-                     if (res.date> data.past){
-                        result.push(res);
-                     }
-                    });
-                 event.sender.send("response", {'success':'true', "data": result})
-                })
+             }, () => event.sender.send("response", {'success':'true','source': 'Result', "data": getLastNDaysRecord(results, data.past)})
+                )
         
     }
     })
 
 ipcMain.on("createBill", (event, data) => {
-    let GrossWeight = parseFloat(parseInt(data.GrossWeightInKwintal) + parseInt(data.GrossWeightInKilo)/1000)
-    let DeductionWeight = parseFloat(parseInt(data.DeductionWeightInKwintal) + parseInt(data.DeductionWeightInKilo)/1000)
-    let NetWeight = parseFloat(parseInt(data.NetWeightInKwintal) + parseInt(data.NetWeightInKilo)/1000)
+    let GrossWeight = parseFloat(parseInt(data.GrossWeightInKwintal) + parseFloat(parseInt(data.GrossWeightInKilo)/100))
+    let DeductionWeight = parseFloat(parseInt(data.DeductionWeightInKwintal) + parseFloat(parseInt(data.DeductionWeightInKilo)/100))
+    let NetWeight = parseFloat(parseInt(data.NetWeightInKwintal) + parseFloat(parseInt(data.NetWeightInKilo)/100))
     db.serialize(function() {
         var stmt = db.prepare("INSERT INTO records VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         stmt.run(data.invoice_id, data.vehicle_number, data.date, data.seller_name, data.buyer_name, 
@@ -145,10 +147,10 @@ ipcMain.on("createBill", (event, data) => {
                 data.notes
                  );
         stmt.finalize();
-        // db.each("SELECT invoice_id AS id, seller_name, buyer_name FROM records", function(err, row) {
-        //     console.log(row.id + ": " + row.seller_name);
-        mainWindow.webContents.send("response", {'success': 'true'});
-        // });
+        data['GrossWeight'] = GrossWeight
+        data['DeductionWeight'] = DeductionWeight
+        data['NetWeight'] = NetWeight
+        mainWindow.webContents.send("response", {'success': 'true', 'source': 'Created', data: data});
     })
 
   });

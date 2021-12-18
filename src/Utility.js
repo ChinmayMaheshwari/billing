@@ -30,7 +30,7 @@ export const getInteger = (val) => {
 export const intialStateData = {
     'invoice_id': '',
     'vehicle_number': '',
-    'date': new Date().toLocaleString(),
+    'date': new Date(),
     'seller_name': '',
     'buyer_name': '',
     'category': 'Cotton',

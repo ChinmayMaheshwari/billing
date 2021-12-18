@@ -12,7 +12,7 @@ function App() {
   return (
     <>
       <Navbar setflag={setflag}/>
-      {flag?<Dashboard setShow={setShow} setModalContent={setModalContent} />:<Billing setShow={setShow} />}
+      {flag?<Dashboard setShow={setShow} setModalContent={setModalContent} />:<Billing setShow={setShow}  setModalContent={setModalContent}/>}
       <WaitModal show={show} setShow={setShow} prop={modalContent}/>
     </>
   );

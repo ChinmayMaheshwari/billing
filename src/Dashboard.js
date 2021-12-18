@@ -7,13 +7,13 @@ function Dashboard({setShow, setModalContent}) {
   const getDateAfterSubtraction = (num) => {
     var tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate()-parseInt(num));
-    return tomorrow.toLocaleString()
+    return tomorrow.getTime()
   }
   const [query, setQuery] = useState({ 'past': getDateAfterSubtraction(1), 'q': ''})
   useEffect(() => {
     window.api.receive("response", (data) => {
-      console.log(data)
-      setResult(data.data.sort((a, b) => b.invoice_id-a.invoice_id));
+      if(data.source=='Result')
+        setResult(data.data.sort((a, b) => b.invoice_id-a.invoice_id));
     });
     window.api.send('getBillByName', query);
   }, []);
@@ -56,7 +56,7 @@ function Dashboard({setShow, setModalContent}) {
           </Form.Label>
           <InputGroup>
             <InputGroup.Text>Query</InputGroup.Text>
-            <FormControl value={query.q} onChange={(e) => setQuery({...query, q: e.target.value})} id="inlineFormInputGroupUsername" placeholder="Seller Name" />
+            <FormControl value={query.q} onChange={(e) => setQuery({...query, q: e.target.value})} id="inlineFormInputGroupUsername" placeholder="Buyer Name" />
           </InputGroup>
         </Col>
         <Col xs="auto" className="my-1">
@@ -93,7 +93,7 @@ function Dashboard({setShow, setModalContent}) {
           {result.map( (data) => {
             return  (<tr>
             <td>{data.invoice_id}</td>
-            <td>{data.date}</td>
+            <td>{new Date(data.date).toLocaleString()}</td>
             <td>{data.buyer_name}</td>
             <td>{data.NetWeight}</td>
             <td>{data.rate}</td>
