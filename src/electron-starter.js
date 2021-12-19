@@ -109,13 +109,23 @@ function getLastNDaysRecord(results, past){
 }
 ipcMain.on("getBillByName", (event, data) => {
     var results = []
-    if (data.q){
-            db.each(`SELECT * FROM records where buyer_name LIKE '%${data.q}%'`, function(err, row) {
+    if (data.buyer & data.seller) {
+        db.each(`SELECT * FROM records where buyer_name LIKE '%${data.buyer}%' AND seller_name LIKE '%${data.seller}%'`, function(err, row) {
             results.push(row);
-             }, () => event.sender.send("response", {'success':'true', 'source': 'Result', "data": getLastNDaysRecord(results, data.past)}))
+        }, () => event.sender.send("response", {'success':'true', 'source': 'Result', "data": getLastNDaysRecord(results, data.past)}))
+    }
+    else if (data.buyer) {
+        db.each(`SELECT * FROM records where buyer_name LIKE '%${data.buyer}%'`, function(err, row) {
+            results.push(row);
+         }, () => event.sender.send("response", {'success':'true', 'source': 'Result', "data": getLastNDaysRecord(results, data.past)}))
+    }
+    else if (data.seller) {
+        db.each(`SELECT * FROM records where seller_name LIKE '%${data.seller}%'`, function(err, row) {
+            results.push(row);
+         }, () => event.sender.send("response", {'success':'true', 'source': 'Result', "data": getLastNDaysRecord(results, data.past)}))
     }
     else{
-        db.each(`SELECT * FROM records where date>= ${data.past}`, function(err, row) {
+        db.each(`SELECT * FROM records`, function(err, row) {
             results.push(row);
              }, () => event.sender.send("response", {'success':'true','source': 'Result', "data": getLastNDaysRecord(results, data.past)})
                 )

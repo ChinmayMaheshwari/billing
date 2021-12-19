@@ -9,7 +9,7 @@ function Dashboard({setShow, setModalContent}) {
     tomorrow.setDate(tomorrow.getDate()-parseInt(num));
     return tomorrow.getTime()
   }
-  const [query, setQuery] = useState({ 'past': getDateAfterSubtraction(1), 'q': ''})
+  const [query, setQuery] = useState({ 'past': getDateAfterSubtraction(1), 'buyer': '', 'seller': ''})
   useEffect(() => {
     window.api.receive("response", (data) => {
       if(data.source=='Result')
@@ -39,7 +39,7 @@ function Dashboard({setShow, setModalContent}) {
     return (
     <Container className="justify-content-md-center">
       <Row className="align-items-center m-5">
-        <Col sm={4} className="my-1">
+        <Col sm={3} className="my-1">
         <InputGroup>
             <InputGroup.Text>Past</InputGroup.Text>
           <Form.Select aria-label="Floating label select example" onChange={setDateForSearch}>
@@ -51,12 +51,21 @@ function Dashboard({setShow, setModalContent}) {
           </InputGroup>
         </Col>
         <Col sm={4} className="my-1">
-          <Form.Label htmlFor="inlineFormInputGroupUsername" visuallyHidden>
+          <Form.Label htmlFor="inlineFormInputGroupSeller" visuallyHidden>
+            Buyer
+          </Form.Label>
+          <InputGroup>
+            <InputGroup.Text>Buyer</InputGroup.Text>
+            <FormControl value={query.q} onChange={(e) => setQuery({...query, 'buyer': e.target.value})} id="inlineFormInputGroupSeller" placeholder="Buyer Name" />
+          </InputGroup>
+        </Col>
+        <Col sm={4} className="my-1">
+          <Form.Label htmlFor="inlineFormInputGroupBuyer" visuallyHidden>
             Seller
           </Form.Label>
           <InputGroup>
-            <InputGroup.Text>Query</InputGroup.Text>
-            <FormControl value={query.q} onChange={(e) => setQuery({...query, q: e.target.value})} id="inlineFormInputGroupUsername" placeholder="Buyer Name" />
+            <InputGroup.Text>Seller</InputGroup.Text>
+            <FormControl value={query.q} onChange={(e) => setQuery({...query, 'seller': e.target.value})} id="inlineFormInputGroupBuyer" placeholder="Seller Name" />
           </InputGroup>
         </Col>
         <Col xs="auto" className="my-1">
